@@ -17,7 +17,7 @@ PROJECT_DIR    := $(shell pwd)
 GO             ?= go
 GOFMT          ?= $(GO)fmt
 FIRST_GOPATH   := $(firstword $(subst :, ,$(shell $(GO) env GOPATH)))
-TRICKSTER_MAIN := cmd/trickster
+TRICKSTER_MAIN := ./cmd/trickster
 TRICKSTER      := $(FIRST_GOPATH)/bin/trickster
 PROGVER        := $(shell grep 'applicationVersion = ' $(TRICKSTER_MAIN)/main.go | awk '{print $$3}' | sed -e 's/\"//g')
 BUILD_TIME     := $(shell date -u +%FT%T%z)
@@ -53,8 +53,8 @@ test-go-mod:
 	@git diff --quiet --exit-code go.mod go.sum || echo "There are changes to go.mod and go.sum which needs to be committed"
 
 .PHONY: build
-build: go-mod-tidy go-mod-vendor
-	GOOS=$(GOOS) GOARCH=$(GOARCH) CGO_ENABLED=$(CGO_ENABLED) $(GO) build $(LDFLAGS) -o ./$(BUILD_SUBDIR)/trickster -a -v $(TRICKSTER_MAIN)/*.go
+build: #go-mod-tidy go-mod-vendor
+	GOOS=$(GOOS) GOARCH=$(GOARCH) CGO_ENABLED=$(CGO_ENABLED) $(GO) build $(LDFLAGS) -o ./$(BUILD_SUBDIR)/trickster -a $(TRICKSTER_MAIN)
 
 rpm: build
 	mkdir -p ./$(BUILD_SUBDIR)/SOURCES

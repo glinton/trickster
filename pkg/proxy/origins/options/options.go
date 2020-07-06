@@ -136,6 +136,8 @@ type Options struct {
 	// BackfillTolerance is the time.Duration representation of BackfillToleranceSecs
 	BackfillTolerance time.Duration `toml:"-"`
 	// ValueRetention is the time.Duration representation of ValueRetentionSecs
+	//
+	// Deprecated: ValueRetention exists for compatibility and should not be used.
 	ValueRetention time.Duration `toml:"-"`
 	// Scheme is the layer 7 protocol indicator (e.g. 'http'), derived from OriginURL
 	Scheme string `toml:"-"`

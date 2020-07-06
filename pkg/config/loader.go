@@ -112,7 +112,7 @@ func Load(applicationName string, applicationVersion string, arguments []string)
 		o.PathPrefix = url.Path
 		o.Timeout = time.Duration(o.TimeoutSecs) * time.Second
 		o.BackfillTolerance = time.Duration(o.BackfillToleranceSecs) * time.Second
-		o.TimeseriesRetention = time.Duration(o.TimeseriesRetentionFactor)
+		o.TimeseriesRetention = time.Duration(o.TimeseriesRetentionFactor) // should this be multiplied by a duration?
 		o.TimeseriesTTL = time.Duration(o.TimeseriesTTLSecs) * time.Second
 		o.FastForwardTTL = time.Duration(o.FastForwardTTLSecs) * time.Second
 		o.MaxTTL = time.Duration(o.MaxTTLSecs) * time.Second

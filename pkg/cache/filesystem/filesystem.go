@@ -126,7 +126,6 @@ func (c *Cache) Retrieve(cacheKey string, allowExpired bool) ([]byte, status.Loo
 }
 
 func (c *Cache) retrieve(cacheKey string, allowExpired bool, atime bool) ([]byte, status.LookupStatus, error) {
-
 	dataFile := c.getFileName(cacheKey)
 
 	nl, _ := c.locker.RAcquire(c.lockPrefix + cacheKey)
@@ -154,6 +153,7 @@ func (c *Cache) retrieve(cacheKey string, allowExpired bool, atime bool) ([]byte
 	}
 
 	o.Expiration = c.Index.GetExpiration(cacheKey)
+	fmt.Printf("Expiration: %v, CacheKey: %v\n", o.Expiration, cacheKey)
 	if allowExpired || o.Expiration.IsZero() || o.Expiration.After(time.Now()) {
 		c.Logger.Debug("filesystem cache retrieve", log.Pairs{"key": cacheKey, "dataFile": dataFile})
 		if atime {

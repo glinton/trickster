@@ -330,12 +330,14 @@ func GetRequestCachingPolicy(h http.Header) *CachingPolicy {
 	cp := &CachingPolicy{LocalDate: time.Now()}
 
 	if hasPragmaNoCache(h) {
+		fmt.Println("nocache")
 		cp.NoCache = true
 		return cp
 	}
 
 	// Cache-Control has first precedence
 	if v := h.Get(headers.NameCacheControl); v != "" {
+		fmt.Println("cachecontrol")
 		cp.parseCacheControlDirectives(v)
 		if cp.NoCache {
 			return cp
