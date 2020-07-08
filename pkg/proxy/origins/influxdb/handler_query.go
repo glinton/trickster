@@ -18,7 +18,6 @@ package influxdb
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
@@ -34,30 +33,28 @@ import (
 	"github.com/tricksterproxy/trickster/pkg/util/regexp/matching"
 )
 
-const ctxKeyShow = "show"
+type contextKey int
+
+const (
+	showKey contextKey = iota
+)
 
 // QueryHandler handles timeseries requests for InfluxDB and processes them through the delta proxy cache
 func (c *Client) QueryHandler(w http.ResponseWriter, r *http.Request) {
-
 	_, s, _ := params.GetRequestValues(r)
 
 	s = strings.Replace(strings.ToLower(s), "%20", "+", -1)
-	// if it's not a select statement, just proxy it instead
 
-	fmt.Println("select", strings.Count(s, "q=select+") != 1)
-	fmt.Println("show  ", strings.Count(s, "q=show+") != 1)
+	showQuery := !((!strings.HasPrefix(s, "q=show+")) && (!(strings.Index(s, "&q=show+") > 0)))
 
-	showCount := -1
-	if showCount = strings.Count(s, "q=show+"); showCount != 1 && strings.Count(s, "q=select+") != 1 {
-		fmt.Printf("q %q failed\n", s)
-		// if ((!strings.HasPrefix(s, "q=select+")) && (!(strings.Index(s, "&q=select+") > 0))) ||
-		// 	((!strings.HasPrefix(s, "q=show+")) && (!(strings.Index(s, "&q=show+")) > 0)) {
+	// if it's not a show or select statement, just proxy it instead
+	if !showQuery && (!strings.HasPrefix(s, "q=select+")) && (!(strings.Index(s, "&q=select+") > 0)) {
 		c.ProxyHandler(w, r)
 		return
 	}
 
-	if showCount == 1 {
-		r = r.WithContext(context.WithValue(r.Context(), ctxKeyShow, true))
+	if showQuery {
+		r = r.WithContext(context.WithValue(r.Context(), showKey, true))
 		r.Header.Del("Pragma")
 		// r.Header.Del("Cache-Control")
 		r.Header.Set("Cache-Control", "max-age=60")
@@ -77,11 +74,6 @@ func (c *Client) QueryHandler(w http.ResponseWriter, r *http.Request) {
 		// r.Header.Set("Max-Age", "1m")
 	}
 
-	fmt.Println("Checking d cache i guess")
-	fmt.Printf("headers: %+v\n", r.Header)
-	// fmt.Printf("headers: %+v\n", r.Header)
-	// fmt.Println("OC", .OriginConfig)
-
 	r.URL = urls.BuildUpstreamURL(r, c.baseUpstreamURL)
 	engines.DeltaProxyCacheRequest(w, r)
 }
@@ -99,13 +91,10 @@ func (c *Client) ParseTimeRangeQuery(r *http.Request) (*timeseries.TimeRangeQuer
 	// if the Step wasn't found in the query (e.g., "group by time(1m)"), just proxy it instead
 	step, found := matching.GetNamedMatch("step", reStep, trq.Statement)
 	if !found {
-		fmt.Println("STEP not found, defaulting to 1s")
 		step = "1s"
-		// if v, ok := r.Context().Value(ctxKeyShow).(bool); ok && v {
+		// if v, ok := r.Context().Value(showKey).(bool); ok && v {
 		// 	step = "60s"
 		// }
-	} else {
-		fmt.Println("STEP found", step)
 	}
 
 	stepDuration, err := timeconv.ParseDuration(step)
@@ -114,15 +103,11 @@ func (c *Client) ParseTimeRangeQuery(r *http.Request) (*timeseries.TimeRangeQuer
 	}
 	trq.Step = stepDuration
 	trq.Statement, trq.Extent = getQueryParts(trq.Statement)
-	fmt.Println("QueryParts", trq.Statement, trq.Extent)
-	if v, ok := r.Context().Value(ctxKeyShow).(bool); ok && v {
+	if v, ok := r.Context().Value(showKey).(bool); ok && v {
 		now := time.Now().Truncate(time.Minute)
-		// trq.Extent = timeseries.Extent{Start: now.Add(-(time.Minute * 5))}
-		trq.Extent = timeseries.Extent{Start: now.Add(-(time.Minute)), End: now}
-		// trq.Extent = timeseries.Extent{Start: now, End: now.Add((time.Second))}
+		trq.Extent = timeseries.Extent{Start: now, End: now}
 	}
 
-	fmt.Println("QueryPartsAFTER", trq.Statement, trq.Extent)
 	trq.TemplateURL = urls.Clone(r.URL)
 
 	qt := url.Values(http.Header(v).Clone())

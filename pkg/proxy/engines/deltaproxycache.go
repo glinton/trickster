@@ -18,7 +18,6 @@ package engines
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"sync"
 	"time"
@@ -130,7 +129,6 @@ func DeltaProxyCacheRequest(w http.ResponseWriter, r *http.Request) {
 		}
 		cacheStatus = status.LookupStatusPurge
 		go cache.Remove(key)
-		fmt.Println("fetching days")
 		cts, doc, elapsed, err = fetchTimeseries(pr, trq, client)
 		if err != nil {
 			pr.cacheLock.RRelease()
@@ -143,7 +141,6 @@ func DeltaProxyCacheRequest(w http.ResponseWriter, r *http.Request) {
 	} else {
 		doc, cacheStatus, _, err = QueryCache(ctx, cache, key, nil)
 		if cacheStatus == status.LookupStatusKeyMiss && err == tc.ErrKNF {
-			fmt.Println("fetching daays")
 			cts, doc, elapsed, err = fetchTimeseries(pr, trq, client)
 			if err != nil {
 				pr.cacheLock.RRelease()
@@ -168,7 +165,6 @@ func DeltaProxyCacheRequest(w http.ResponseWriter, r *http.Request) {
 				pr.Logger.Error("cache object unmarshaling failed",
 					tl.Pairs{"key": key, "originName": client.Name(), "detail": err.Error()})
 				go cache.Remove(key)
-				fmt.Println("fetching daaays")
 				cts, doc, elapsed, err = fetchTimeseries(pr, trq, client)
 				if err != nil {
 					pr.cacheLock.RRelease()
@@ -316,7 +312,6 @@ func DeltaProxyCacheRequest(w http.ResponseWriter, r *http.Request) {
 				defer spanMR.End()
 			}
 
-			fmt.Println("Missrangecall")
 			body, resp, _ := rq.Fetch()
 			if resp.StatusCode == http.StatusOK && len(body) > 0 {
 				nts, err := client.UnmarshalTimeseries(body)
@@ -415,7 +410,6 @@ func DeltaProxyCacheRequest(w http.ResponseWriter, r *http.Request) {
 					}
 					doc.Body = cdata
 				}
-				fmt.Println("WRiting to cache", oc)
 				if err := WriteCache(ctx, cache, key, doc, oc.TimeseriesTTL, oc.CompressableTypes); err != nil {
 					pr.Logger.Error("error writing object to cache",
 						tl.Pairs{
@@ -472,7 +466,6 @@ func logDeltaRoutine(log *tl.Logger, p tl.Pairs) { log.Debug("delta routine comp
 func fetchTimeseries(pr *proxyRequest, trq *timeseries.TimeRangeQuery,
 	client origins.TimeseriesClient) (timeseries.Timeseries, *HTTPDocument, time.Duration, error) {
 
-	fmt.Println("fetchtimeseriesCall")
 	rsc := request.GetResources(pr.Request)
 
 	ctx, span := tspan.NewChildSpan(pr.upstreamRequest.Context(), rsc.Tracer, "FetchTimeSeries")
