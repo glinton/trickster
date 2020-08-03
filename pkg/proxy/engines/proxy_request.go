@@ -162,6 +162,7 @@ func (pr *proxyRequest) Fetch() ([]byte, *http.Response, time.Duration) {
 	var body []byte
 	var err error
 	if reader != nil {
+		// todo: maybe optionally pass the body reader back down to save memory?
 		body, err = ioutil.ReadAll(reader)
 		resp.Body.Close()
 	}

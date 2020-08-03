@@ -106,6 +106,7 @@ func DeltaProxyCacheRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	client.SetExtent(pr.upstreamRequest, trq, &trq.Extent)
+
 	key := oc.CacheKeyPrefix + ".dpc." + pr.DeriveCacheKey(trq.TemplateURL, "")
 	pr.cacheLock, _ = locker.RAcquire(key)
 
@@ -305,6 +306,7 @@ func DeltaProxyCacheRequest(w http.ResponseWriter, r *http.Request) {
 			rq.upstreamRequest = rq.WithContext(tctx.WithResources(
 				trace.ContextWithSpan(context.Background(), span),
 				request.NewResources(oc, pc, cc, cache, client, rsc.Tracer, pr.Logger)))
+
 			client.SetExtent(rq.upstreamRequest, trq, e)
 
 			ctxMR, spanMR := tspan.NewChildSpan(rq.upstreamRequest.Context(), rsc.Tracer, "FetchRange")
@@ -501,6 +503,7 @@ func fetchTimeseries(pr *proxyRequest, trq *timeseries.TimeRangeQuery,
 		return nil, d, time.Duration(0), tpe.ErrUnexpectedUpstreamResponse
 	}
 
+	// todo: unmarshal byte slice (rather than io.reader)
 	ts, err := client.UnmarshalTimeseries(body)
 	if err != nil {
 		pr.Logger.Error("proxy object unmarshaling failed", tl.Pairs{"body": string(body)})

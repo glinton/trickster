@@ -17,7 +17,9 @@
 // Package methods provides functionality for handling HTTP methods
 package methods
 
-import "net/http"
+import (
+	"net/http"
+)
 
 const (
 	get uint16 = 1 << iota

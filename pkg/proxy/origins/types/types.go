@@ -34,6 +34,8 @@ const (
 	OriginTypeIronDB
 	// OriginTypeClickHouse represents the ClickHouse origin type
 	OriginTypeClickHouse
+	// OriginTypeFlux represents the Flux origin type
+	OriginTypeFlux
 )
 
 // Names is a map of OriginTypes keyed by string name
@@ -45,6 +47,7 @@ var Names = map[string]OriginType{
 	"influxdb":          OriginTypeInfluxDB,
 	"irondb":            OriginTypeIronDB,
 	"clickhouse":        OriginTypeClickHouse,
+	"flux":              OriginTypeFlux,
 }
 
 // Values is a map of OriginTypes valued by string name

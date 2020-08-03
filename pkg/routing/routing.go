@@ -29,6 +29,7 @@ import (
 	"github.com/tricksterproxy/trickster/pkg/proxy/methods"
 	"github.com/tricksterproxy/trickster/pkg/proxy/origins"
 	"github.com/tricksterproxy/trickster/pkg/proxy/origins/clickhouse"
+	"github.com/tricksterproxy/trickster/pkg/proxy/origins/flux"
 	"github.com/tricksterproxy/trickster/pkg/proxy/origins/influxdb"
 	"github.com/tricksterproxy/trickster/pkg/proxy/origins/irondb"
 	oo "github.com/tricksterproxy/trickster/pkg/proxy/origins/options"
@@ -181,6 +182,8 @@ func registerOriginRoutes(router *mux.Router, conf *config.Config, k string,
 		client, err = prometheus.NewClient(k, o, mux.NewRouter(), c)
 	case "influxdb":
 		client, err = influxdb.NewClient(k, o, mux.NewRouter(), c)
+	case "flux":
+		client, err = flux.NewClient(k, o, mux.NewRouter(), c)
 	case "irondb":
 		client, err = irondb.NewClient(k, o, mux.NewRouter(), c)
 	case "clickhouse":

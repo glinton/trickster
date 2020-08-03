@@ -155,9 +155,11 @@ func PrepareFetchReader(r *http.Request) (io.ReadCloser, *http.Response, int64) 
 
 	if pc != nil {
 		headers.UpdateHeaders(r.Header, pc.RequestHeaders)
+		// why these empty?  is set in url.go
 		qp, _, _ := params.GetRequestValues(r)
 		params.UpdateParams(qp, pc.RequestParams)
-		params.SetRequestValues(r, qp)
+		// todo: this blows the whole thing up because it clears out the body, as the query is a POST
+		// params.SetRequestValues(r, qp)
 	}
 
 	r.Close = false

@@ -20,7 +20,7 @@ require (
 	github.com/onsi/gomega v1.7.0 // indirect
 	github.com/prometheus/client_golang v1.5.0
 	github.com/prometheus/common v0.9.1
-	github.com/stretchr/testify v1.5.1 // indirect
+	github.com/stretchr/testify v1.6.1 // indirect
 	github.com/tinylib/msgp v1.1.1
 	github.com/tricksterproxy/mockster v1.1.1
 	github.com/yuin/gopher-lua v0.0.0-20190514113301-1cd887cd7036 // indirect
